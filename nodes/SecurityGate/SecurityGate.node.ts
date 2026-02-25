@@ -11,6 +11,7 @@ export class SecurityGate implements INodeType {
 		name: 'securityGate',
 		icon: 'file:security-gate.svg',
 		group: ['transform'],
+		usableAsTool: true,
 		version: 1,
 		description: 'Validate an input value against a stored secure credential',
 		defaults: {
@@ -21,7 +22,7 @@ export class SecurityGate implements INodeType {
 		outputNames: ['Valid', 'Invalid'],
 		credentials: [
 			{
-				name: 'securityToken',
+				name: 'securityTokenApi',
 				required: true,
 			},
 		],
@@ -34,6 +35,26 @@ export class SecurityGate implements INodeType {
 				description: 'The value from the flow (e.g. Header) to be compared against the selected credential',
 				required: true,
 			},
+			{
+				displayName: 'Valid Response Override',
+				name: 'validResponse',
+				type: 'string',
+				typeOptions: {
+					rows: 4,
+				},
+				default: '',
+				description: 'If set, this JSON/text will be returned on Output 0 instead of the original item',
+			},
+			{
+				displayName: 'Invalid Response Override',
+				name: 'invalidResponse',
+				type: 'string',
+				typeOptions: {
+					rows: 4,
+				},
+				default: '',
+				description: 'If set, this JSON/text will be returned on Output 1 instead of the original item',
+			},
 		],
 	};
 
@@ -42,27 +63,48 @@ export class SecurityGate implements INodeType {
 		const validItems: INodeExecutionData[] = [];
 		const invalidItems: INodeExecutionData[] = [];
 
-		const credentials = await this.getCredentials('securityToken');
+		const credentials = await this.getCredentials('securityTokenApi');
 		const securityToken = credentials.token as string;
+
+		const validResponseOverride = this.getNodeParameter('validResponse', 0) as string;
+		const invalidResponseOverride = this.getNodeParameter('invalidResponse', 0) as string;
+
+		const getResultItem = (override: string, index: number, originalItem: INodeExecutionData): INodeExecutionData => {
+			if (override && override.trim() !== '') {
+				try {
+					return {
+						json: JSON.parse(override),
+						pairedItem: {
+							item: index,
+						},
+					};
+				} catch {
+					return {
+						json: {
+							response: override,
+						},
+						pairedItem: {
+							item: index,
+						},
+					};
+				}
+			}
+			return {
+				...originalItem,
+				pairedItem: {
+					item: index,
+				},
+			};
+		};
 
 		for (let i = 0; i < items.length; i++) {
 			try {
 				const valueToValidate = this.getNodeParameter('valueToValidate', i) as string;
 
 				if (valueToValidate === securityToken) {
-					validItems.push({
-						...items[i],
-						pairedItem: {
-							item: i,
-						},
-					});
+					validItems.push(getResultItem(validResponseOverride, i, items[i]));
 				} else {
-					invalidItems.push({
-						...items[i],
-						pairedItem: {
-							item: i,
-						},
-					});
+					invalidItems.push(getResultItem(invalidResponseOverride, i, items[i]));
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {

@@ -33,11 +33,13 @@ Store your secret key in the **Security Token** credential.
 ### Parameters
 
 - **Value to Validate**: The expression or string to compare (e.g., `{{ $json.headers["x-api-key"] }}`).
+- **Valid Response Override**: (Optional) Multiline text or JSON. If provided, this will be returned on Output 0.
+- **Invalid Response Override**: (Optional) Multiline text or JSON. If provided, this will be returned on Output 1.
 
 ### Outputs
 
-1. **Valid (Top)**: Items that strictly match (===) the credential token.
-2. **Invalid (Bottom)**: Items that do not match or where an error occurred during validation.
+1. **Valid (Top)**: Items that strictly match (===) the credential token. Returns original data or override.
+2. **Invalid (Bottom)**: Items that do not match or where an error occurred. Returns original data or override.
 
 ## License
 

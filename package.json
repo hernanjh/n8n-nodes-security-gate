@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-security-gate",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "n8n node for visual and secure credential validation",
 	"license": "MIT",
 	"homepage": "",
@@ -31,7 +31,7 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/SecurityToken.credentials.js"
+			"dist/credentials/SecurityTokenApi.credentials.js"
 		],
 		"nodes": [
 			"dist/nodes/SecurityGate/SecurityGate.node.js"
