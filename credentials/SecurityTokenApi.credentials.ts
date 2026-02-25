@@ -3,7 +3,7 @@ import { ICredentialType, INodeProperties, ICredentialTestRequest } from 'n8n-wo
 export class SecurityTokenApi implements ICredentialType {
 	name = 'securityTokenApi';
 	displayName = 'Security Token API';
-	icon = 'file:security-gate.svg';
+	icon = 'file:security-gate.svg' as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 	testedBy = ['securityGate'];
 	documentationUrl = 'https://docs.n8n.io/integrations/community-nodes/';
 	test: ICredentialTestRequest = {
